@@ -19,7 +19,6 @@ func PageFromFile(f settings.File) Page {
 		LogPath:     f.LogPath,
 		TokensText:  strings.Join(f.DeviceTokens, "\n"),
 		TokenCount:  len(f.DeviceTokens),
-		Sandbox:     f.Sandbox,
 		APNsOn:      len(f.DeviceTokens) > 0,
 		PasswordSet: f.HTTPPassword != "",
 	}
@@ -45,7 +44,6 @@ func MergeForm(cur settings.File, in Form) settings.File {
 		cur.LogPath = in.LogPath
 	}
 	cur.DeviceTokens = in.DeviceTokens
-	cur.Sandbox = in.Sandbox
 	if in.ClearPassword {
 		cur.HTTPPassword = ""
 	} else if strings.TrimSpace(in.HTTPPassword) != "" {

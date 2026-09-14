@@ -59,23 +59,21 @@
 
 ### 不用准备、也不要往里填的
 
-- 苹果推送用的证书已经做进程序，不用去苹果开发者后台申请，也不要往设置里填。
+- 推送到手机不需要你再申请别的，设置页贴上 Token 即可。
 - 官方提醒 Bot 默认就是 `@nodemaid_bot`，一般不用改。
 - 不需要 Telegram Bot token，也不需要 `.env`。
 - 当前交付是单个二进制，不做 Docker。
-
-**沙盒开关：** 只有用 Xcode 装到真机上的调试包才勾「APNs 沙盒」。TestFlight 或 App Store 安装的包不要勾。
 
 ## 3. 怎么部署
 
 ### 下载现成二进制
 
-打 `v*` 标签后，GitHub Actions 会编译并挂到该 tag 的 Release 上。VPS 按架构取其中一个：
+打开仓库的 Releases，按机器架构下一个文件：
 
 - `ns-apns-linux-amd64`（常见云主机）
 - `ns-apns-linux-arm64`（ARM 机器）
 
-私有仓库下载需要登录 GitHub。把文件改名为 `ns-apns`，放到工作目录并 `chmod +x`。
+私有仓库需要登录 GitHub。把文件改名为 `ns-apns`，放到工作目录并 `chmod +x`。
 
 ### 自己编译（有 Go 时）
 
@@ -119,7 +117,7 @@ ssh -L 8787:127.0.0.1:8787 user@你的VPS
 
 1. （可选）「访问密码」填上并保存。空着则不用登录。忘了改 `settings.json` 的 `http_password`。
 2. 填 `api_id`、`api_hash`，保存。有旧 `session.json` 会自动上线；没有则扫页面二维码（手机 Telegram → 设置 → 设备 → 扫描）。
-3. 粘贴 device token（可选）。Xcode 包打开「APNs 沙盒」。
+3. 粘贴 device token（可选）。
 4. 测试 Bot 可选。官方 Bot 默认 `nodemaid_bot`，不用改。
 5. 顶部 Telegram 显示你的名字后即在监听。
 
@@ -167,13 +165,3 @@ ExecStart=/opt/ns-apns/ns-apns run
 4. 把官方「新提醒」原样转到这个 Bot
 
 程序会按原文类型发推送（评论 / @ / 签到 / 系统提醒；认不出的也推，点进去不跳页）。
-
-## 5. 点开通知会去哪
-
-| 原文 | 点通知 |
-|---|---|
-| `{谁}评论了你的帖子` | 帖子详情 |
-| `有用户@了我` | 有帖子链接进详情；否则打开「提到我」页面 |
-| 签到 | 签到页 |
-| `收到一条系统提醒` | 隐藏论坛头部，打开该条对话 |
-| 无法识别 | 只出横幅，不跳页 |

@@ -14,13 +14,12 @@ import (
 )
 
 type Sender struct {
-	mu             sync.Mutex
-	primary        *apns2.Client
-	fallback       *apns2.Client
-	preferSandbox  bool
-	topic          string
-	tokens         []string
-	log            *slog.Logger
+	mu        sync.Mutex
+	primary   *apns2.Client
+	fallback  *apns2.Client
+	topic     string
+	tokens    []string
+	log       *slog.Logger
 }
 
 func New(cfg config.Config, log *slog.Logger) (*Sender, error) {
@@ -36,23 +35,13 @@ func New(cfg config.Config, log *slog.Logger) (*Sender, error) {
 		return nil, fmt.Errorf("解析内置 .p8: %w", err)
 	}
 	tok := &token.Token{AuthKey: authKey, KeyID: keyID, TeamID: teamID}
-	prod := apns2.NewTokenClient(tok).Production()
-	dev := apns2.NewTokenClient(tok).Development()
-	primary, fallback := prod, dev
-	if cfg.Sandbox {
-		primary, fallback = dev, prod
-		log.Info("APNs 优先沙盒（Xcode 调试包）；BadDeviceToken 时会改打生产")
-	} else {
-		log.Info("APNs 优先生产；BadDeviceToken 时会改打沙盒")
-	}
-	log.Info("APNs 已启用", "topic", bundleID, "devices", len(cfg.DeviceTokens), "sandbox", cfg.Sandbox)
+	log.Info("APNs 已启用", "topic", bundleID, "devices", len(cfg.DeviceTokens))
 	return &Sender{
-		primary:       primary,
-		fallback:      fallback,
-		preferSandbox: cfg.Sandbox,
-		topic:         bundleID,
-		tokens:        cfg.DeviceTokens,
-		log:           log,
+		primary:  apns2.NewTokenClient(tok).Production(),
+		fallback: apns2.NewTokenClient(tok).Development(),
+		topic:    bundleID,
+		tokens:   cfg.DeviceTokens,
+		log:      log,
 	}, nil
 }
 
@@ -104,25 +93,20 @@ func (s *Sender) Send(ctx context.Context, ev forward.Event) error {
 }
 
 func (s *Sender) pushWithFallback(ctx context.Context, n *apns2.Notification) (string, *apns2.Response, error) {
-	firstName, secondName := "production", "sandbox"
-	first, second := s.primary, s.fallback
-	if s.preferSandbox {
-		firstName, secondName = "sandbox", "production"
-	}
-	res, err := first.PushWithContext(ctx, n)
+	res, err := s.primary.PushWithContext(ctx, n)
 	if err != nil {
-		return firstName, nil, err
+		return "production", nil, err
 	}
 	if res.StatusCode == 200 {
-		return firstName, res, nil
+		return "production", res, nil
 	}
-	if res.Reason != apns2.ReasonBadDeviceToken || second == nil {
-		return firstName, res, nil
+	if res.Reason != apns2.ReasonBadDeviceToken || s.fallback == nil {
+		return "production", res, nil
 	}
-	s.log.Info("token 与当前环境不匹配，改打另一侧", "from", firstName, "to", secondName)
-	res2, err := second.PushWithContext(ctx, n)
+	s.log.Info("token 与当前环境不匹配，改打另一侧", "from", "production", "to", "sandbox")
+	res2, err := s.fallback.PushWithContext(ctx, n)
 	if err != nil {
-		return secondName, nil, err
+		return "sandbox", nil, err
 	}
-	return secondName, res2, nil
+	return "sandbox", res2, nil
 }

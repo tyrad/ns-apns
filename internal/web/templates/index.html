@@ -77,6 +77,16 @@
     }
     label:first-child { margin-top: 0; }
     .hint { display: block; margin-top: .15rem; color: var(--muted); font-weight: 400; font-size: .78rem; }
+    a { color: var(--accent); }
+    .howto {
+      margin: 0 0 1rem;
+      padding: 0 0 0 1.15rem;
+      color: var(--muted);
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .78rem;
+      font-weight: 400;
+    }
+    .howto li { margin: .18rem 0; }
     input[type=text], input[type=password], input[type=number], textarea {
       width: 100%;
       margin-top: .28rem;
@@ -156,7 +166,7 @@
       <span class="k">Telegram</span><b>{{or .TelegramUser "未登录"}}</b>
       <span class="k">官方 Bot</span><b>@{{.SourceBot}}{{if .SourceID}} · {{.SourceID}}{{end}}</b>
       <span class="k">测试 Bot</span><b>{{if .TestBot}}@{{.TestBot}}{{if .TestID}} · {{.TestID}}{{end}}{{else}}未设置{{end}}</b>
-      <span class="k">APNs</span><b>{{if .APNsOn}}{{.TokenCount}} 台设备{{else}}未绑定 token{{end}}{{if .Sandbox}} · 沙盒{{end}}</b>
+      <span class="k">APNs</span><b>{{if .APNsOn}}{{.TokenCount}} 台设备{{else}}未绑定 token{{end}}</b>
       <span class="k">网页</span><b>{{or .HTTPAddr "127.0.0.1:8787"}}</b>
     </div>
     {{if .HasQR}}
@@ -172,8 +182,13 @@
   <form class="panel" method="post" action="{{if .Debug}}?debug{{end}}">
     <input type="hidden" name="op" value="save">
     {{if .Debug}}<input type="hidden" name="debug" value="1">{{end}}
+    <ol class="howto">
+      <li>打开 <a href="https://my.telegram.org/apps" target="_blank" rel="noopener">my.telegram.org/apps</a></li>
+      <li>用已经绑定 NodeSeek「新提醒」的那个 Telegram 号登录</li>
+      <li>新建应用，Platform 选 Desktop</li>
+      <li>把下面的 api_id、api_hash 填上。丢了再申请一对即可，不要发给别人</li>
+    </ol>
     <label>Telegram api_id
-      <span class="hint">在 my.telegram.org 申请</span>
       <input type="number" name="app_id" value="{{if .AppID}}{{.AppID}}{{end}}" min="1" autocomplete="off">
     </label>
     <label>Telegram api_hash
@@ -199,12 +214,8 @@
       <input type="text" name="test_bot" value="{{if .TestBot}}@{{.TestBot}}{{end}}" placeholder="@your_test_bot" autocomplete="off">
     </label>
     <label>Device Token
-      <span class="hint">从 NS Connect 复制，每行一个</span>
+      <span class="hint">NS Connect → 设置 → 推送通知 → 获取 Token → 复制。多台手机每行一个，换机或重装后要重新复制。</span>
       <textarea name="device_tokens" placeholder="每行一个 token">{{.TokensText}}</textarea>
-    </label>
-    <label class="check">
-      <input type="checkbox" name="sandbox" value="1" {{if .Sandbox}}checked{{end}}>
-      <span>APNs 沙盒（仅 Xcode 调试包）</span>
     </label>
     <label>代理
       <span class="hint">可选，改完需重启进程</span>

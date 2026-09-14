@@ -16,7 +16,6 @@ type Config struct {
 	Proxy        string
 	LogLevel     string
 	DeviceTokens []string
-	Sandbox      bool
 	HTTPAddr     string
 	SettingsPath string
 	LogPath      string
@@ -51,7 +50,6 @@ func FromFile(f settings.File) Config {
 		Proxy:        f.Proxy,
 		LogLevel:     f.LogLevel,
 		DeviceTokens: append([]string(nil), f.DeviceTokens...),
-		Sandbox:      f.Sandbox,
 		SettingsPath: settings.Path,
 		LogPath:      f.LogPath,
 		HTTPPassword: f.HTTPPassword,
@@ -69,7 +67,6 @@ func (c Config) Settings() settings.File {
 		LogLevel:     c.LogLevel,
 		LogPath:      c.LogPath,
 		DeviceTokens: append([]string(nil), c.DeviceTokens...),
-		Sandbox:      c.Sandbox,
 		HTTPPassword: c.HTTPPassword,
 	}
 }

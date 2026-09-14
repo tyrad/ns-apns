@@ -20,7 +20,6 @@ type File struct {
 	LogLevel     string   `json:"log_level"`
 	LogPath      string   `json:"log_path"`
 	DeviceTokens []string `json:"device_tokens"`
-	Sandbox      bool     `json:"sandbox"`
 	HTTPPassword string   `json:"http_password"`
 }
 

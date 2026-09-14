@@ -8,6 +8,5 @@
   "log_level": "info",
   "log_path": "ns-apns.log",
   "device_tokens": [],
-  "sandbox": false,
   "http_password": ""
 }

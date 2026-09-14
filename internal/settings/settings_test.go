@@ -14,7 +14,6 @@ func TestSaveLoad(t *testing.T) {
 		SourceBot:    "@nodemaid_bot",
 		TestBot:      "nsconnnectbot",
 		DeviceTokens: []string{" aaa ", "aaa", "bbb"},
-		Sandbox:      true,
 	}
 	if err := Save(path, in); err != nil {
 		t.Fatal(err)

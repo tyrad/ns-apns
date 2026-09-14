@@ -33,7 +33,6 @@ type Page struct {
 	LogPath      string
 	TokensText   string
 	TokenCount   int
-	Sandbox      bool
 	APNsOn       bool
 	HTTPAddr     string
 	HasQR        bool
@@ -53,7 +52,6 @@ type Form struct {
 	LogLevel     string
 	LogPath      string
 	DeviceTokens []string
-	Sandbox      bool
 	HTTPPassword  string
 	ClearPassword bool
 }
@@ -192,7 +190,6 @@ func handleIndexPost(w http.ResponseWriter, r *http.Request, hooks Hooks) {
 		LogLevel:     r.FormValue("log_level"),
 		LogPath:      r.FormValue("log_path"),
 		DeviceTokens: splitLines(r.FormValue("device_tokens")),
-		Sandbox:       r.FormValue("sandbox") == "1",
 		HTTPPassword:  r.FormValue("http_password"),
 		ClearPassword: r.FormValue("clear_password") == "1",
 	}

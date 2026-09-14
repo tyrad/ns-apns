@@ -29,7 +29,6 @@ func (c *Client) webView() web.Page {
 		LogPath:      c.cfg.LogPath,
 		TokensText:   strings.Join(c.cfg.DeviceTokens, "\n"),
 		TokenCount:   len(c.cfg.DeviceTokens),
-		Sandbox:      c.cfg.Sandbox,
 		APNsOn:       c.pusher != nil,
 		HTTPAddr:     c.cfg.HTTPAddr,
 		PasswordSet:  c.cfg.HTTPPassword != "",
@@ -78,7 +77,6 @@ func (c *Client) applySettings(ctx context.Context, s settings.File) error {
 		"source", "@"+s.SourceBot,
 		"test", "@"+s.TestBot,
 		"devices", len(s.DeviceTokens),
-		"sandbox", s.Sandbox,
 	)
 	return nil
 }
