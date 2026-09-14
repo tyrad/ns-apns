@@ -226,10 +226,16 @@
     <input type="hidden" name="log_path" value="{{.LogPath}}">
     <div class="bar">
       <button class="btn primary" type="submit">保存</button>
+      <button class="btn" type="submit" form="push-test-form">推送测试</button>
       {{if .PasswordSet}}
       <button class="btn" type="submit" form="logout-form">退出登录</button>
       {{end}}
     </div>
+  </form>
+  <form id="push-test-form" method="post" action="{{if .Debug}}?debug{{end}}" hidden>
+    <input type="hidden" name="op" value="push-test">
+    <input type="hidden" name="kind" value="reply">
+    {{if .Debug}}<input type="hidden" name="debug" value="1">{{end}}
   </form>
   {{if .PasswordSet}}
   <form id="logout-form" method="post" action="/" hidden>
