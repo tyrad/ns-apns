@@ -2,7 +2,7 @@
 
 监听 NodeSeek 官方 Telegram「新提醒」（`@nodemaid_bot`），解析后推到 NS Connect。这不是 Bot：官方把消息推到**你的 Telegram 账号**，本程序登录同一个号去收。
 
-配置只有一份 `settings.json`，用网页改。没有 `.env`。仓库：https://github.com/tyrad/ns-apns （私有）。
+配置只有一份 `settings.json`，用网页改。没有 `.env`。仓库：https://github.com/tyrad/ns-apns
 
 ## 谁做什么
 
@@ -91,35 +91,28 @@ Device Token **不要发给 AI**，只贴到设置页。
 
 ### 3.2 拿到二进制（两种方式，选一种）
 
-仓库是私有的，下载或克隆都要有这个仓库的权限。
-
 **方式 A：从 Release 下载（不用编译）**
 
-1. 浏览器打开 https://github.com/tyrad/ns-apns/releases （先登录 GitHub）。
+1. 打开 https://github.com/tyrad/ns-apns/releases
 2. 打开最新一条（或指定的 tag），按下表下对应文件。
-3. 推荐在自己电脑上下好，再拷到服务器，服务器上不必登录 GitHub：
+3. 可以在自己电脑上下好再拷到服务器：
 
 ```bash
 scp ns-apns-linux-amd64 user@你的VPS:<安装目录>/ns-apns
 ```
 
-4. 若必须在服务器上直接拉，用 GitHub 个人访问令牌（PAT，权限能读这个私有仓），**不要用 `gh` 命令**：
+4. 也可以在服务器上直接拉（**不要用 `gh` 命令**）：
 
 ```bash
-# 把 TOKEN 换成令牌，文件名按架构改
-curl -L \
-  -H "Authorization: Bearer TOKEN" \
-  -H "Accept: application/octet-stream" \
-  -o ns-apns \
+# 文件名按架构改，版本号改成 Release 页面上实际的 tag
+curl -L -o ns-apns \
   https://github.com/tyrad/ns-apns/releases/download/v0.1.0/ns-apns-linux-amd64
 chmod +x ns-apns
 ```
 
-版本号改成 Release 页面上实际的 tag。令牌用完不要写进仓库、不要写进文档。
-
 **方式 B：自己编译**
 
-需要 Go 1.22+，以及克隆这个私有仓的权限（HTTPS 登录或 SSH key）。
+需要 Go 1.22+。
 
 ```bash
 git clone https://github.com/tyrad/ns-apns.git
