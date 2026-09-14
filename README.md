@@ -13,22 +13,26 @@
 3. 新建应用，Platform 选 Desktop
 4. 记下 `api_id` 和 `api_hash`，稍后填进设置页
 
-这两项只标明「这是哪个程序」。不要发到群里；丢了再申请一对即可。
+这两项只标明「这是哪个程序」。不要发给别人；丢了再申请一对即可。
 
 程序起来后，设置页默认是 [http://127.0.0.1:8787/](http://127.0.0.1:8787/)：
 
-![设置页](docs/settings-page.png)
+![设置页](docs/settings-page.jpg)
 
-| 开机自启、Docker等需求请自行调整处理。
+开机自启、Docker 等需求请自行处理。Device Token 只在设置页自己贴，不要发给 AI。
 
 ## 部署交给 AI
 
-把服务器安装、设置页、扫码登录这些交给 AI，让它按这份文档做：
+把装到服务器、拉起进程交给 AI，让它按这份文档做。扫码和 Token 你自己在设置页完成。
 
-[`docs/deploy.md`](docs/deploy.md)
+https://github.com/tyrad/ns-apns/blob/main/docs/deploy.md
 
 可以对 AI 说：
 
 ```
-请按 docs/deploy.md 帮我部署 ns-apns。我已经申请好 Telegram 的 api_id 和 api_hash。
+请按 https://github.com/tyrad/ns-apns/blob/main/docs/deploy.md 帮我部署 ns-apns。
+我已经申请好 Telegram 的 api_id 和 api_hash。
+部署机器是：<SSH 用户@地址>
+部署目录：<安装目录>
+Device Token 我自己在设置页填，不要向我要 token。
 ```
