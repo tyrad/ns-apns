@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ns-apns</title>
+  {{if .Refresh}}<meta http-equiv="refresh" content="2">{{end}}
+  <style>
+    :root {
+      --bg: #efe8dc;
+      --paper: #fbf7f0;
+      --ink: #1a1714;
+      --muted: #6f675e;
+      --line: #e0d6c8;
+      --accent: #1f4f43;
+      --on-accent: #f4efe6;
+      --ok-bg: #e4f0e6;
+      --ok: #1e5a38;
+      --err-bg: #f6e4e1;
+      --err: #8a2f2c;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #12100e;
+        --paper: #1c1916;
+        --ink: #f0e9df;
+        --muted: #a79e93;
+        --line: #3a342c;
+        --accent: #8fcbb8;
+        --on-accent: #10211c;
+        --ok-bg: #1c3326;
+        --ok: #b4e0c2;
+        --err-bg: #3a2220;
+        --err: #f0b4ae;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(900px 280px at 10% -10%, #e7d3b855, transparent 50%),
+        var(--bg);
+      font: 15px/1.5 "Iowan Old Style", "Songti SC", "Source Han Serif SC", ui-serif, serif;
+    }
+    main { max-width: 38rem; margin: 0 auto; padding: 2.25rem 1.2rem 3.5rem; }
+    header { margin-bottom: 1.35rem; }
+    h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: -.03em;
+    }
+    .sub { margin: .35rem 0 0; color: var(--muted); font-size: .92rem; }
+    .panel {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 1.05rem 1.15rem 1.15rem;
+      margin-bottom: .85rem;
+    }
+    .facts {
+      display: grid;
+      grid-template-columns: 5.5rem 1fr;
+      gap: .28rem .75rem;
+      font-size: .9rem;
+      color: var(--muted);
+    }
+    .facts b { color: var(--ink); font-weight: 650; font-family: ui-sans-serif, system-ui, sans-serif; }
+    .k { font-family: ui-sans-serif, system-ui, sans-serif; font-size: .78rem; letter-spacing: .04em; }
+    label {
+      display: block;
+      margin: .95rem 0 .32rem;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .82rem;
+      font-weight: 650;
+    }
+    label:first-child { margin-top: 0; }
+    .hint { display: block; margin-top: .15rem; color: var(--muted); font-weight: 400; font-size: .78rem; }
+    input[type=text], input[type=password], input[type=number], textarea {
+      width: 100%;
+      margin-top: .28rem;
+      padding: .55rem .65rem;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: color-mix(in srgb, var(--paper) 70%, white);
+      color: var(--ink);
+      font: 14px/1.4 ui-sans-serif, system-ui, sans-serif;
+    }
+    textarea { min-height: 7rem; font-family: ui-monospace, Menlo, monospace; font-size: 12.5px; }
+    .check {
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+      margin-top: 1rem;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .9rem;
+      font-weight: 500;
+    }
+    .actions, .bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      align-items: center;
+    }
+    .bar { margin-top: 1.1rem; }
+    form.bare { display: contents; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 2.4rem;
+      padding: 0 1rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--ink);
+      font: 650 13px/1 ui-sans-serif, system-ui, sans-serif;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .btn:hover { border-color: var(--ink); }
+    .btn.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--on-accent);
+    }
+    .flash {
+      margin: 0 0 .85rem;
+      padding: .65rem .8rem;
+      border-radius: 10px;
+      font-family: ui-sans-serif, system-ui, sans-serif;
+      font-size: .88rem;
+    }
+    .ok { background: var(--ok-bg); color: var(--ok); }
+    .err { background: var(--err-bg); color: var(--err); }
+    .tools .lead {
+      margin: 0 0 .7rem;
+      color: var(--muted);
+      font-size: .88rem;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>ns-apns</h1>
+    <p class="sub">配置写在 settings.json。保存 api 后本页会自动连 Telegram，不必回终端。</p>
+  </header>
+
+  {{if .Flash}}<p class="flash ok">{{.Flash}}</p>{{end}}
+  {{if .Error}}<p class="flash err">{{.Error}}</p>{{end}}
+
+  <section class="panel">
+    <div class="facts">
+      <span class="k">Telegram</span><b>{{or .TelegramUser "未登录"}}</b>
+      <span class="k">官方 Bot</span><b>@{{.SourceBot}}{{if .SourceID}} · {{.SourceID}}{{end}}</b>
+      <span class="k">测试 Bot</span><b>{{if .TestBot}}@{{.TestBot}}{{if .TestID}} · {{.TestID}}{{end}}{{else}}未设置{{end}}</b>
+      <span class="k">APNs</span><b>{{if .APNsOn}}{{.TokenCount}} 台设备{{else}}未绑定 token{{end}}{{if .Sandbox}} · 沙盒{{end}}</b>
+      <span class="k">网页</span><b>{{or .HTTPAddr "127.0.0.1:8787"}}</b>
+    </div>
+    {{if .HasQR}}
+    <div style="margin-top:1rem;text-align:center">
+      <img src="/qr.png" width="220" height="220" alt="扫码登录" style="border-radius:12px;background:#fff;padding:8px">
+      <p class="hint" style="margin:.6rem 0 0">手机 Telegram → 设置 → 设备 → 扫描二维码</p>
+    </div>
+    {{else if .Connecting}}
+    <p class="lead" style="margin:.9rem 0 0">正在连接 Telegram…</p>
+    {{end}}
+  </section>
+
+  <form class="panel" method="post" action="{{if .Debug}}?debug{{end}}">
+    <input type="hidden" name="op" value="save">
+    {{if .Debug}}<input type="hidden" name="debug" value="1">{{end}}
+    <label>Telegram api_id
+      <span class="hint">在 my.telegram.org 申请</span>
+      <input type="number" name="app_id" value="{{if .AppID}}{{.AppID}}{{end}}" min="1" autocomplete="off">
+    </label>
+    <label>Telegram api_hash
+      <span class="hint">{{if .AppHashSet}}已保存，留空表示不改{{else}}尚未填写{{end}}</span>
+      <input type="password" name="app_hash" value="" placeholder="{{if .AppHashSet}}已保存{{end}}" autocomplete="off">
+    </label>
+    <label>访问密码
+      <span class="hint">{{if .PasswordSet}}已开启。留空不改。{{else}}可选。设了之后打开本页要先输入。{{end}}</span>
+      <input type="password" name="http_password" value="" autocomplete="new-password">
+    </label>
+    {{if .PasswordSet}}
+    <label class="check">
+      <input type="checkbox" name="clear_password" value="1">
+      <span>关闭访问密码</span>
+    </label>
+    {{end}}
+    <label>官方提醒 Bot
+      <span class="hint">NodeSeek「新提醒」，一般不用改</span>
+      <input type="text" name="source_bot" value="@{{.SourceBot}}" autocomplete="off">
+    </label>
+    <label>测试 Bot
+      <span class="hint">BotFather 自建。先 /start，再把官方评论转过来测试。可空。</span>
+      <input type="text" name="test_bot" value="{{if .TestBot}}@{{.TestBot}}{{end}}" placeholder="@your_test_bot" autocomplete="off">
+    </label>
+    <label>Device Token
+      <span class="hint">从 NS Connect 复制，每行一个</span>
+      <textarea name="device_tokens" placeholder="每行一个 token">{{.TokensText}}</textarea>
+    </label>
+    <label class="check">
+      <input type="checkbox" name="sandbox" value="1" {{if .Sandbox}}checked{{end}}>
+      <span>APNs 沙盒（仅 Xcode 调试包）</span>
+    </label>
+    <label>代理
+      <span class="hint">可选，改完需重启进程</span>
+      <input type="text" name="proxy" value="{{.Proxy}}" placeholder="socks5://127.0.0.1:1080" autocomplete="off">
+    </label>
+    <input type="hidden" name="session_path" value="{{.SessionPath}}">
+    <input type="hidden" name="log_level" value="{{.LogLevel}}">
+    <input type="hidden" name="log_path" value="{{.LogPath}}">
+    <div class="bar">
+      <button class="btn primary" type="submit">保存</button>
+      {{if .PasswordSet}}
+      <button class="btn" type="submit" form="logout-form">退出登录</button>
+      {{end}}
+    </div>
+  </form>
+  {{if .PasswordSet}}
+  <form id="logout-form" method="post" action="/" hidden>
+    <input type="hidden" name="op" value="logout">
+  </form>
+  {{end}}
+
+  <section class="panel tools">
+    <p class="lead">调试</p>
+    <div class="actions">
+      <a class="btn" href="/logs{{if .Debug}}?debug{{end}}">下载日志</a>
+    </div>
+    {{if .Debug}}
+    <p class="lead" style="margin-top:.9rem">按类型发测试推送（点通知应跳到对应页）</p>
+    <div class="actions">
+      <form class="bare" method="post" action="?debug">
+        <input type="hidden" name="op" value="push-test">
+        <input type="hidden" name="kind" value="reply">
+        <button class="btn" type="submit">测试评论</button>
+      </form>
+      <form class="bare" method="post" action="?debug">
+        <input type="hidden" name="op" value="push-test">
+        <input type="hidden" name="kind" value="at">
+        <button class="btn" type="submit">测试@</button>
+      </form>
+      <form class="bare" method="post" action="?debug">
+        <input type="hidden" name="op" value="push-test">
+        <input type="hidden" name="kind" value="checkin">
+        <button class="btn" type="submit">测试签到</button>
+      </form>
+      <form class="bare" method="post" action="?debug">
+        <input type="hidden" name="op" value="push-test">
+        <input type="hidden" name="kind" value="message">
+        <button class="btn" type="submit">测试私信</button>
+      </form>
+      <form class="bare" method="post" action="?debug">
+        <input type="hidden" name="op" value="push-test">
+        <input type="hidden" name="kind" value="inbox">
+        <button class="btn" type="submit">测试站内通知</button>
+      </form>
+    </div>
+    {{end}}
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ns-apns 登录</title>
+  <style>
+    :root { --bg:#efe8dc; --paper:#fbf7f0; --ink:#1a1714; --muted:#6f675e; --line:#e0d6c8; --accent:#1f4f43; --on:#f4efe6; --err-bg:#f6e4e1; --err:#8a2f2c; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg:#12100e; --paper:#1c1916; --ink:#f0e9df; --muted:#a79e93; --line:#3a342c; --accent:#8fcbb8; --on:#10211c; --err-bg:#3a2220; --err:#f0b4ae; }
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; color:var(--ink); background:var(--bg); font:15px/1.5 ui-serif, "Songti SC", serif; }
+    main { max-width:22rem; margin:12vh auto; padding:0 1.2rem; }
+    h1 { font-size:1.5rem; margin:0 0 .4rem; }
+    p { color:var(--muted); margin:0 0 1rem; }
+    form { background:var(--paper); border:1px solid var(--line); border-radius:14px; padding:1.1rem; }
+    input { width:100%; margin:.4rem 0 1rem; padding:.6rem .7rem; border:1px solid var(--line); border-radius:9px; background:transparent; color:var(--ink); font:inherit; }
+    button { height:2.4rem; padding:0 1.1rem; border:0; border-radius:999px; background:var(--accent); color:var(--on); font:650 13px ui-sans-serif, system-ui, sans-serif; cursor:pointer; }
+    .err { background:var(--err-bg); color:var(--err); padding:.6rem .75rem; border-radius:10px; margin-bottom:.85rem; font-family:ui-sans-serif, system-ui, sans-serif; font-size:.88rem; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>ns-apns</h1>
+  <p>输入访问密码</p>
+  {{if .Error}}<div class="err">{{.Error}}</div>{{end}}
+  <form method="post" action="/">
+    <input type="hidden" name="op" value="login">
+    <input type="password" name="password" autofocus autocomplete="current-password">
+    <button type="submit">进入</button>
+  </form>
+</main>
+</body>
+</html>

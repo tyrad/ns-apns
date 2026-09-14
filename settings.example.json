@@ -1,0 +1,13 @@
+{
+  "app_id": 0,
+  "app_hash": "",
+  "session_path": "session.json",
+  "source_bot": "nodemaid_bot",
+  "test_bot": "",
+  "proxy": "",
+  "log_level": "info",
+  "log_path": "ns-apns.log",
+  "device_tokens": [],
+  "sandbox": false,
+  "http_password": ""
+}
