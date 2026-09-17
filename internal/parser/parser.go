@@ -32,15 +32,18 @@ const (
 	KindCheckin
 	KindAt
 	KindInbox
+	KindMessage
 )
 
 var (
-	replyRe    = regexp.MustCompile(`^(.+?)评论了你的帖子`)
-	checkinRe  = regexp.MustCompile(`今天的签到收益是`)
-	atMeRe     = regexp.MustCompile(`@了?我`)
-	mentionRe  = regexp.MustCompile(`提到了你`)
-	atAuthorRe = regexp.MustCompile(`^(.+?)提到了你`)
-	inboxRe    = regexp.MustCompile(`系统提醒`)
+	replyRe         = regexp.MustCompile(`^(.+?)评论了你的帖子`)
+	checkinRe       = regexp.MustCompile(`今天的签到收益是`)
+	atMeRe          = regexp.MustCompile(`@了?我`)
+	mentionRe       = regexp.MustCompile(`提到了你`)
+	atAuthorRe      = regexp.MustCompile(`^(.+?)提到了你`)
+	inboxRe         = regexp.MustCompile(`系统提醒`)
+	messageRe       = regexp.MustCompile(`给你发了一条私信`)
+	messageAuthorRe = regexp.MustCompile(`^(.+?)给你发了一条私信`)
 	// /post-{id}-{page}#{floor} ，中间那段是分页不是楼层。
 	postRe = regexp.MustCompile(`(?i)(?:nodeseek\.com|deepflood\.com)/post-(\d+)(?:-(\d+))?(?:#(\d+))?`)
 )
@@ -55,6 +58,8 @@ func TypeName(k Kind) string {
 		return "checkin"
 	case KindInbox:
 		return "inbox"
+	case KindMessage:
+		return "message"
 	default:
 		return "other"
 	}
@@ -71,6 +76,10 @@ func Parse(text string, entities []Entity) (kind Kind, parsed Reply) {
 		}
 	case KindAt:
 		if r, ok := ParseAt(text, entities); ok {
+			return kind, r
+		}
+	case KindMessage:
+		if r, ok := ParseMessage(text, entities); ok {
 			return kind, r
 		}
 	}
@@ -96,6 +105,9 @@ func Classify(text string) Kind {
 	}
 	if inboxRe.MatchString(text) {
 		return KindInbox
+	}
+	if messageRe.MatchString(text) {
+		return KindMessage
 	}
 	return KindOther
 }
@@ -135,6 +147,27 @@ func ParseAt(text string, entities []Entity) (Reply, bool) {
 		}
 	}
 	r := Reply{Author: author}
+	rawURL := firstURL(text, entities)
+	if rawURL == "" {
+		return r, true
+	}
+	r.URL = rawURL
+	r.PostID, r.Floor = parsePost(rawURL)
+	return r, true
+}
+
+// ParseMessage 解析私信。官方原文是「{用户名}给你发了一条私信，点击查看」。
+func ParseMessage(text string, entities []Entity) (Reply, bool) {
+	text = strings.TrimSpace(text)
+	if Classify(text) != KindMessage {
+		return Reply{}, false
+	}
+	r := Reply{}
+	if m := messageAuthorRe.FindStringSubmatch(text); len(m) > 1 {
+		if name := strings.TrimSpace(m[1]); name != "" {
+			r.Author = name
+		}
+	}
 	rawURL := firstURL(text, entities)
 	if rawURL == "" {
 		return r, true

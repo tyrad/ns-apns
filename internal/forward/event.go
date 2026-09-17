@@ -7,15 +7,15 @@ import (
 )
 
 type Event struct {
-	Type               string    `json:"type"`
-	Source             string    `json:"source"`
-	TelegramMessageID  int       `json:"telegram_message_id"`
-	OccurredAt         time.Time `json:"occurred_at"`
-	Author             string    `json:"author"`
-	URL                string    `json:"url,omitempty"`
-	PostID             string    `json:"post_id,omitempty"`
-	Floor              string    `json:"floor,omitempty"`
-	RawText            string    `json:"raw_text"`
+	Type              string    `json:"type"`
+	Source            string    `json:"source"`
+	TelegramMessageID int       `json:"telegram_message_id"`
+	OccurredAt        time.Time `json:"occurred_at"`
+	Author            string    `json:"author"`
+	URL               string    `json:"url,omitempty"`
+	PostID            string    `json:"post_id,omitempty"`
+	Floor             string    `json:"floor,omitempty"`
+	RawText           string    `json:"raw_text"`
 }
 
 func NewReply(msgID int, at time.Time, raw string, r parser.Reply) Event {
@@ -37,14 +37,14 @@ func TestEvent(kind string) Event {
 	switch kind {
 	case "at", "mention":
 		return Event{
-			Type:      "at",
-			Source:    parser.Source,
+			Type:       "at",
+			Source:     parser.Source,
 			OccurredAt: now,
-			Author:    "ns-apns",
-			URL:       "https://www.nodeseek.com/post-1-1#1",
-			PostID:    "1",
-			Floor:     "1",
-			RawText:   "测试：有人提到了你",
+			Author:     "ns-apns",
+			URL:        "https://www.nodeseek.com/post-1-1#1",
+			PostID:     "1",
+			Floor:      "1",
+			RawText:    "测试：有人提到了你",
 		}
 	case "checkin":
 		return Event{
@@ -59,6 +59,7 @@ func TestEvent(kind string) Event {
 			Source:     parser.Source,
 			OccurredAt: now,
 			Author:     "ns-apns",
+			URL:        "https://www.nodeseek.com/notification#/message?mode=talk&to=1",
 			RawText:    "测试：一条私信",
 		}
 	case "inbox", "notification":

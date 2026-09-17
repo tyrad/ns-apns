@@ -54,13 +54,41 @@ func TestAlertCopyByType(t *testing.T) {
 	if title != "签到结果" {
 		t.Fatalf("checkin title=%q", title)
 	}
-	title, _ = alertCopy(forward.Event{Type: "message", Author: "bob"})
-	if title != "bob 发来私信" {
+	title, _ = alertCopy(forward.Event{Type: "message", Author: "ICMP不可达喵"})
+	if title != "ICMP不可达喵 发来私信" {
 		t.Fatalf("message title=%q", title)
 	}
 	var body string
 	title, body = alertCopy(forward.Event{Type: "other", RawText: "奇怪的通知"})
 	if title != "NodeSeek 通知" || body != "奇怪的通知" {
 		t.Fatalf("other title=%q body=%q", title, body)
+	}
+}
+
+func TestPayloadFromPrivateMessage(t *testing.T) {
+	ev := forward.Event{
+		Type:    "message",
+		Author:  "ICMP不可达喵",
+		URL:     "https://www.nodeseek.com/notification#/message?mode=talk&to=28302",
+		RawText: "ICMP不可达喵给你发了一条私信，点击查看",
+	}
+	raw, err := payloadFrom(ev).MarshalJSON()
+	if err != nil {
+		t.Fatal(err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(raw, &got); err != nil {
+		t.Fatal(err)
+	}
+	if got["type"] != "message" || got["url"] != ev.URL {
+		t.Fatalf("custom=%v", got)
+	}
+	if _, ok := got["post_id"]; ok {
+		t.Fatalf("private message must not set post_id: %v", got)
+	}
+	aps := got["aps"].(map[string]any)
+	alert := aps["alert"].(map[string]any)
+	if alert["title"] != "ICMP不可达喵 发来私信" {
+		t.Fatalf("title=%v", alert["title"])
 	}
 }

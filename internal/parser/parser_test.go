@@ -18,6 +18,22 @@ func TestParseUnifiesKinds(t *testing.T) {
 	if TypeName(kind) != "other" {
 		t.Fatalf("other=%v", kind)
 	}
+	kind, parsed = Parse("ICMP不可达喵给你发了一条私信，点击查看", []Entity{{
+		Type: "text_link",
+		URL:  "https://www.nodeseek.com/notification#/message?mode=talk&to=28302",
+	}})
+	if kind != KindMessage || TypeName(kind) != "message" {
+		t.Fatalf("message kind=%v name=%s", kind, TypeName(kind))
+	}
+	if parsed.Author != "ICMP不可达喵" {
+		t.Fatalf("message author=%q", parsed.Author)
+	}
+	if parsed.URL != "https://www.nodeseek.com/notification#/message?mode=talk&to=28302" {
+		t.Fatalf("message url=%q", parsed.URL)
+	}
+	if parsed.PostID != "" || parsed.Floor != "" {
+		t.Fatalf("message must not take talk id as post, got %+v", parsed)
+	}
 }
 
 func TestClassifyAt(t *testing.T) {
@@ -63,6 +79,8 @@ func TestClassify(t *testing.T) {
 		{"🍗🍗🍗\n今天的签到收益是3个🍗，有点少", KindCheckin},
 		{"今天的签到收益是10个🍗，欧皇认定", KindCheckin},
 		{"收到一条系统提醒点击查看", KindInbox},
+		{"ICMP不可达喵给你发了一条私信，点击查看", KindMessage},
+		{"alice给你发了一条私信", KindMessage},
 		{"U9 迎新有礼", KindOther},
 		{"", KindOther},
 	}
@@ -163,5 +181,42 @@ func TestParseReplyPrefersNodeSeekLink(t *testing.T) {
 func TestParseReplyNotComment(t *testing.T) {
 	if _, ok := ParseReply("今天的签到收益是3个🍗，有点少", nil); ok {
 		t.Fatal("checkin must not parse as reply")
+	}
+}
+
+func TestParseMessageOfficial(t *testing.T) {
+	text := "ICMP不可达喵给你发了一条私信，点击查看"
+	ent := []Entity{{
+		Type: "text_link",
+		URL:  "https://www.nodeseek.com/notification#/message?mode=talk&to=28302",
+	}}
+	r, ok := ParseMessage(text, ent)
+	if !ok {
+		t.Fatal("expected message")
+	}
+	if r.Author != "ICMP不可达喵" {
+		t.Fatalf("author=%q", r.Author)
+	}
+	if r.URL != "https://www.nodeseek.com/notification#/message?mode=talk&to=28302" {
+		t.Fatalf("url=%q", r.URL)
+	}
+}
+
+func TestParseMessageWithoutURLStillOK(t *testing.T) {
+	r, ok := ParseMessage("bob给你发了一条私信，点击查看", nil)
+	if !ok {
+		t.Fatal("expected message")
+	}
+	if r.Author != "bob" {
+		t.Fatalf("author=%q", r.Author)
+	}
+	if r.URL != "" {
+		t.Fatalf("expected empty url, got %+v", r)
+	}
+}
+
+func TestParseMessageNotInbox(t *testing.T) {
+	if _, ok := ParseMessage("收到一条系统提醒点击查看", nil); ok {
+		t.Fatal("inbox must not parse as message")
 	}
 }
